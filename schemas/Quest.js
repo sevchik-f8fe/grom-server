@@ -5,4 +5,4 @@ const QuestSchema = new mongoose.Schema({
     winner: { type: mongoose.Schema.Types.ObjectId, ref: 'Team', default: null },
 });
 
-export default mongoose.model('Admin', AdminSchema)
+export default mongoose.model('Quest', QuestSchema)
