@@ -1,25 +1,20 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const TeamSchema = new mongoose.Schema({
-    teamName: { type: String, required: true, },
-    currentPoint: { type: mongoose.Schema.Types.ObjectId, ref: 'Point', required: true, },
+    teamName: { type: String, required: true, unique: true },
+    currentPoint: { type: mongoose.Schema.Types.ObjectId, ref: 'Point', required: true, default: () => new mongoose.Types.ObjectId('681f7b184842dc852e405f6b') },
     captain: {
         email: { type: String, required: true, unique: true, },
-        phoneNumber: { type: String, required: true, unique: true, },
+        phone: { type: String, required: true, unique: true, },
         passwordHash: { type: String, required: true, },
-        tgUsername: { type: String, required: true, unique: true, },
-        firstName: { type: String, required: true, },
-        lastName: { type: String, required: true, },
-        middleName: { type: String, },
+        username: { type: String, required: true, unique: true, },
+        fullName: { type: String, required: true, },
     },
     subordinates: [{
         email: { type: String, required: true, unique: true, },
-        tgUsername: { type: String, required: true, unique: true, },
-        firstName: { type: String, required: true, },
-        lastName: { type: String, required: true, },
-        middleName: { type: String, },
-        phoneNumber: { type: String, required: true, unique: true, },
+        username: { type: String, required: true, unique: true, },
+        phone: { type: String, required: true, unique: true, },
     }],
 });
 
-module.exports = mongoose.model('Team', TeamSchema);
+export default mongoose.model('Team', TeamSchema);
