@@ -9,9 +9,9 @@ import Admin from "../schemas/Admin.js";
 
 export const signUp = async (req, res) => {
     try {
-        const { teamName, captain, subordinates } = req.body;
+        const { captain, subordinates } = req.body;
 
-        const existingTeam = await Team.findOne({ teamName });
+        const existingTeam = await Team.findOne({ teamName: captain.teamname });
 
         if (existingTeam) {
             return res.status(400).json({
@@ -24,12 +24,12 @@ export const signUp = async (req, res) => {
         const passwordHash = await bcrypt.hash(captain.password, salt);
 
         const newTeamData = {
-            teamName,
+            teamName: captain.teamname,
             captain: {
                 email: captain.email,
                 phone: captain.phone,
                 username: captain.username,
-                fullName: captain.fullName,
+                fullName: captain.fullname,
                 passwordHash,
             },
             subordinates,
@@ -121,6 +121,7 @@ export const signIn = async (req, res) => {
 
         res.status(200).json({
             token,
+            team: team ? team : admin,
             isAdmin: false,
         });
     } catch (err) {

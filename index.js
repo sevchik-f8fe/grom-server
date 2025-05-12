@@ -25,7 +25,9 @@ mongoose
 // app.post('/point/create', createPoint);
 app.post('/auth/signup', signUp);
 app.post('/auth/signin', signIn);
-
-const server = app.listen(3000, '127.0.0.1', () => {
+app.get('/', async (req, res) => {
+    res.json({ ok: 'da' })
+})
+app.listen(3000, '127.0.0.1', () => {
     console.log('server is ok');
 });
