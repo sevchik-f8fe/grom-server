@@ -3,6 +3,9 @@ import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import mongoose from "mongoose";
 import cors from "cors";
+import helmet from "helmet";
+import hpp from "hpp";
+// import xss from "xss-clean";
 import * as dotenv from 'dotenv';
 
 dotenv.config({ path: './.env' });
@@ -14,6 +17,9 @@ const app = express();
 axiosRetry(axios, { retries: 3 });
 app.use(express.json());
 app.use(cors());
+app.use(helmet());
+app.use(hpp());
+// app.use(xss());
 
 mongoose
     .connect(process.env.BD_LINK, {
@@ -22,7 +28,6 @@ mongoose
     .then(() => console.log('db is ok'))
     .catch((err) => console.log('err: ' + err));
 
-// app.post('/point/create', createPoint);
 app.post('/auth/signup', signUp);
 app.post('/auth/signin', signIn);
 app.get('/', async (req, res) => {
