@@ -11,7 +11,7 @@ const reg = /[<>;'"]/;
 
 export const signUp = async (req, res) => {
     try {
-        const { captain, subordinates } = req.body;
+        const { coords, captain, subordinates } = req.body;
 
         for (const key in captain) {
             if (captain.hasOwnProperty(key)) {
@@ -49,6 +49,8 @@ export const signUp = async (req, res) => {
 
         const newTeamData = {
             teamName: captain.teamname,
+            currentCoords: coords,
+            online: true,
             captain: {
                 email: captain.email,
                 phone: captain.phone,
