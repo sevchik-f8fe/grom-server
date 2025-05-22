@@ -14,10 +14,25 @@ dotenv.config({ path: './.env' });
 
 import Team from "./schemas/Team.js";
 import { checkAuthMiddleware, signIn, signUp } from "./controllers/authControllers.js";
+import { getTeams } from "./controllers/adminControllers.js";
 
 const app = express();
 
 const wss = new WebSocketServer({ port: 8080 })
+
+axiosRetry(axios, { retries: 3 });
+app.use(express.json());
+app.use(cors());
+app.use(helmet());
+app.use(hpp());
+
+mongoose
+    .connect(process.env.BD_LINK, {
+        authSource: "admin",
+    })
+    .then(() => console.log('db is ok'))
+    .catch((err) => console.log('err: ' + err));
+
 
 wss.on('connection', ws => {
     console.log('Client connected');
@@ -68,19 +83,7 @@ async function updateTeamCoordsAndBroadcast(wss, message) {
     }
 }
 
-axiosRetry(axios, { retries: 3 });
-app.use(express.json());
-app.use(cors());
-app.use(helmet());
-app.use(hpp());
-
-mongoose
-    .connect(process.env.BD_LINK, {
-        authSource: "admin",
-    })
-    .then(() => console.log('db is ok'))
-    .catch((err) => console.log('err: ' + err));
-
+app.post('/admin/getTeams', getTeams);
 
 app.post('/auth/signup', signUp);
 app.post('/auth/signin', signIn);
