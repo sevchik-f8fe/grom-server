@@ -6,6 +6,7 @@ dotenv.config({ path: '../.env' });
 
 import Team from "../schemas/Team.js";
 import Admin from "../schemas/Admin.js";
+import Quest from "../schemas/Quest.js";
 
 const reg = /[<>;'"]/;
 
@@ -50,7 +51,6 @@ export const signUp = async (req, res) => {
         const newTeamData = {
             teamName: captain.teamname,
             currentCoords: coords,
-            online: true,
             captain: {
                 email: captain.email,
                 phone: captain.phone,
@@ -66,7 +66,7 @@ export const signUp = async (req, res) => {
 
         const token = jwt.sign(
             {
-                _id: team._id,
+                id: team._id,
             },
             process.env.JWT,
             {
@@ -75,7 +75,7 @@ export const signUp = async (req, res) => {
         );
 
         res.status(201).json({
-            team,
+            id: team._id,
             token,
         });
     } catch (err) {
@@ -96,6 +96,12 @@ export const signIn = async (req, res) => {
             });
         };
 
+        if (!phone || phone.length > 50 || reg.test(phone) || !password || password.length > 50 || reg.test(password)) {
+            return res.status(400).json({
+                message: 'Ошибка авторизации. Проверьте введенные данные.',
+            });
+        };
+
         const admin = await Admin.findOne({ phone });
 
         if (admin) {
@@ -109,7 +115,7 @@ export const signIn = async (req, res) => {
 
             const token = jwt.sign(
                 {
-                    _id: admin._id,
+                    id: admin._id,
                     isAdmin: true,
                 },
                 process.env.JWT,
@@ -120,6 +126,7 @@ export const signIn = async (req, res) => {
 
             return res.status(201).json({
                 token,
+                user: admin,
                 isAdmin: true,
             });
         }
@@ -142,7 +149,7 @@ export const signIn = async (req, res) => {
 
         const token = jwt.sign(
             {
-                _id: team._id,
+                id: team._id,
                 isCaptain: true,
             },
             process.env.JWT,
@@ -153,7 +160,7 @@ export const signIn = async (req, res) => {
 
         res.status(200).json({
             token,
-            team: team ? team : admin,
+            user: team,
             isAdmin: false,
         });
     } catch (err) {
@@ -164,22 +171,33 @@ export const signIn = async (req, res) => {
     }
 }
 
-export const checkAuthMiddleware = (req, res, next) => {
+export const checkTeamAuthMiddleware = async (req, res, next) => {
     const token = (req.headers.authorization || '').replace(/Bearer\s?/, '');
 
     if (token) {
         try {
-            const decodedToken = jwt.verify(token, process.env.JWT);
-            req.body.isAdmin = decodedToken.isAdmin;
+            jwt.verify(token, process.env.JWT);
+
+            const quest = await Quest.find({});
+            const now = new Date();
+
+            if (!quest || quest[0].startAt > now || quest[0].winner) {
+                console.log('er at: time')
+                return res.status(404).json({
+                    message: 'Ошибка авторизации. Проверьте введенные данные.',
+                });
+            }
 
             next();
         } catch (err) {
-            res.status(500).json({
+            console.log('er at: ', err)
+            res.status(404).json({
                 message: 'Ошибка авторизации. Проверьте введенные данные.',
             });
         }
     } else {
-        res.status(500).json({
+        console.log('er at: no token')
+        res.status(404).json({
             message: 'Ошибка авторизации. Проверьте введенные данные.',
         });
     }

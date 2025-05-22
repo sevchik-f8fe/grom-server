@@ -13,8 +13,9 @@ import * as dotenv from 'dotenv';
 dotenv.config({ path: './.env' });
 
 import Team from "./schemas/Team.js";
-import { checkAuthMiddleware, signIn, signUp } from "./controllers/authControllers.js";
-import { getTeams } from "./controllers/adminControllers.js";
+import { checkTeamAuthMiddleware, signIn, signUp } from "./controllers/authControllers.js";
+import { checkAdminAuthMiddleware, getPoints, getTeams } from "./controllers/adminControllers.js";
+import { getTime } from "./controllers/pointControllers.js";
 
 const app = express();
 
@@ -32,6 +33,7 @@ mongoose
     })
     .then(() => console.log('db is ok'))
     .catch((err) => console.log('err: ' + err));
+
 
 
 wss.on('connection', ws => {
@@ -83,7 +85,10 @@ async function updateTeamCoordsAndBroadcast(wss, message) {
     }
 }
 
-app.post('/admin/getTeams', getTeams);
+app.post('/admin/getTeams', checkAdminAuthMiddleware, getTeams);
+app.post('/admin/getPoints', checkAdminAuthMiddleware, getPoints);
+
+app.get('/getTime', getTime);
 
 app.post('/auth/signup', signUp);
 app.post('/auth/signin', signIn);
